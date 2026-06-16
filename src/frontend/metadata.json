@@ -1,0 +1,6 @@
+{
+  "name": "MyJournal",
+  "description": "Aplikasi jurnal harian modern dengan analisis suasana hati berbasis AI Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

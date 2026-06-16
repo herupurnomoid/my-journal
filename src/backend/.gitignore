@@ -1,0 +1,55 @@
+# Environments
+.env
+*.env
+
+# Credentials & Service Accounts
+*service-account*.json
+app/config/*.json
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python / Byte-compiled / Optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing / Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# Databases
+*.sqlite3
+*.db
+
+# macOS
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Type checking
+.mypy_cache/
+.pyre/
+
+# Build / Distribution
+build/
+dist/
+*.egg-info/
+.eggs/

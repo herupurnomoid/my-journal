@@ -1,0 +1,31 @@
+services:
+  api:
+    build:
+      context: ../../src/backend
+      dockerfile: ../../deploy/docker/backend.dev.Dockerfile
+    container_name: myjournal_api_dev
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount kode sumber secara langsung agar Uvicorn bisa hot-reload ketika Anda mengubah kode
+      - ../../src/backend:/app
+    environment:
+      - ENVIRONMENT=development
+      # Memberi tahu backend tempat untuk membaca file .env dan .json di dalam docker
+      - ENV_PATH=/app/app/config/env/Development.env
+
+  nginx:
+    image: nginx:alpine
+    container_name: myjournal_nginx_dev
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # Nginx Main Config
+      - ../nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      # Nginx Server Blocks (API proxy pass)
+      - ../nginx/conf.d:/etc/nginx/conf.d:ro
+      # Self-signed certificates yang baru saja di-generate
+      - ../nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
