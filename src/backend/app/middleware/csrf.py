@@ -6,9 +6,10 @@ from app.settings import settings
 
 # Endpoint yang sudah memiliki proteksi CSRF sendiri (OAuth state)
 CSRF_EXEMPT_PATHS = {
-    "/api/v1/auth/google",
-    "/api/v1/auth/refresh",
-    "/api/v1/auth/logout",
+    "/v1/auth/google",
+    "/v1/auth/refresh",
+    "/v1/auth/logout",
+    "/",
 }
 
 # Hanya method state-changing yang perlu proteksi CSRF

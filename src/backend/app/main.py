@@ -34,7 +34,7 @@ setup_access_log(app)         # Logging request time
 setup_request_id(app)         # Inject X-Request-ID ke setiap request
 
 # 3. Include API Routers
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/v1")
 
 @app.get("/", tags=["Health"])
 async def root():

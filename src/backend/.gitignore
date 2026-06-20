@@ -6,9 +6,13 @@
 *service-account*.json
 app/config/*.json
 .venv
-env/
-venv/
+/env/
+/venv/
 ENV/
+
+# Izinkan folder env di config dan env.example
+!app/config/env/
+!app/config/env/env.example
 env.bak/
 venv.bak/
 

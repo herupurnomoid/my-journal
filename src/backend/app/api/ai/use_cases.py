@@ -32,10 +32,10 @@ Jika Anda menolak, berikan balasan JSON dengan:
 - Nilai angka: 0, dan recommendations: ["Fokus kembali pada jurnal Anda"]
 
 2. JIKA TEKS HANYA BERISI KATA DUMMY (misal: "string", "test", "halo", "123") ATAU TERLALU SINGKAT UNTUK DIANALISIS:
-Anda DILARANG mengarang cerita atau berhalusinasi. Anda harus membalas dengan JSON:
-- primaryMood: "❓ Tidak Valid"
-- emotionSummary: "Jurnal Anda terlalu singkat atau tidak berisi cerita yang bisa saya analisis. Silakan ceritakan lebih banyak tentang perasaan Anda hari ini."
-- Nilai angka: 0, dan recommendations: ["Tulis setidaknya 1-2 kalimat utuh."]
+Anda DILARANG mengarang cerita atau berhalusinasi. Anda harus membalas dengan JSON bernada profesional:
+- primaryMood: "📝 Membutuhkan Konteks"
+- emotionSummary: "Teks yang Anda berikan terlalu singkat untuk dianalisis secara akurat. Mohon berikan deskripsi yang lebih rinci mengenai pengalaman atau perasaan Anda hari ini agar kami dapat memberikan wawasan yang lebih baik."
+- Nilai angka: 0, dan recommendations: ["Tambahkan beberapa kalimat deskriptif", "Ceritakan kejadian spesifik hari ini"]
 
 Judul Jurnal: {title}
 Isi Jurnal: {content}
@@ -143,3 +143,35 @@ Berikan respons JSON dengan struktur berikut ini:
         except Exception as e:
             print(f"Error AI Weekly Insight: {e}")
             raise HTTPException(status_code=500, detail="Gagal menyusun insight mingguan.")
+
+    @staticmethod
+    def generate_notification_message(title: str, content: str, hours_inactive: int) -> str:
+        """
+        Menghasilkan pesan push notification yang personal berdasarkan jurnal terakhir pengguna.
+        """
+        if not settings.GEMINI_API_KEY:
+            return "Yuk, luangkan waktu sebentar untuk bercerita hari ini!"
+            
+        genai.configure(api_key=settings.GEMINI_API_KEY)
+        model = genai.GenerativeModel('gemini-3.1-flash-lite')
+        
+        prompt = f"""
+Anda adalah asisten AI empatik dari aplikasi MyJournal.
+Pengguna ini sudah tidak menulis jurnal selama kurang lebih {hours_inactive} jam.
+Jurnal terakhir mereka berjudul: "{title}"
+Isi jurnal: "{content}"
+
+Tugas Anda: Buatlah 1 kalimat notifikasi push yang sangat personal, hangat, dan singkat (Maksimal 15 kata).
+Hubungkan pesan Anda dengan topik di jurnal terakhir mereka agar mereka merasa diperhatikan, dan ajak mereka untuk update cerita hari ini.
+Contoh jika mereka sedang sedih tentang pekerjaan: "Bagaimana perasaanmu tentang pekerjaan hari ini? Ceritakan yuk!"
+Contoh jika mereka senang habis liburan: "Masih terbayang liburan kemarin? Tuliskan momen serunya hari ini!"
+
+Berikan langsung kalimatnya tanpa tanda kutip.
+"""
+        try:
+            response = model.generate_content(prompt)
+            result = response.text.strip().replace('"', '')
+            return result if len(result) > 5 else "Yuk, luangkan waktu sebentar untuk bercerita hari ini!"
+        except Exception as e:
+            print(f"Error AI Notification: {e}")
+            return "Yuk, luangkan waktu sebentar untuk bercerita hari ini!"

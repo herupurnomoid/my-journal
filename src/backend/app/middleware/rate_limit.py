@@ -13,12 +13,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     def __init__(self, app):
         super().__init__(app)
         self.default_limit = 100
-        self.default_window = 60  # 60 detik
-        
-        # Konfigurasi spesifik per endpoint
-        self.strict_paths = {
-            "/api/v1/auth": {"limit": 10, "window": 60},
-            "/api/v1/journals/sync": {"limit": 20, "window": 60},
+        self.default_window = 60
+        self.rate_limits = {
+            "default": {"limit": 100, "window": 60},  # 100 req per minute
+            "/v1/auth": {"limit": 10, "window": 60},
+            "/v1/journals/sync": {"limit": 20, "window": 60},
+            # Add other specific limits here
         }
 
     async def dispatch(self, request: Request, call_next):

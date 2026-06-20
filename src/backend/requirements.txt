@@ -1,0 +1,12 @@
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0.post1
+pydantic[email]>=2.5.2
+pydantic-settings>=2.1.0
+firebase-admin>=6.2.0
+python-dotenv>=1.0.0
+cachetools>=5.3.2
+PyJWT>=2.8.0
+google-generativeai>=0.5.4
+fpdf2>=2.7.9
+firebase-functions>=0.1.0
+a2wsgi>=1.10.0

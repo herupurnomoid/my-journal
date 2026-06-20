@@ -52,9 +52,8 @@ class JournalUseCases:
         # 3. Mengunggah ke Google/Firebase Cloud Storage
         try:
             bucket_name = settings.GOOGLE_STORAGE_BUCKET
-            if not bucket_name or bucket_name == "my-journal.appspot.com":
-                # Fallback dummy URL jika bucket belum disiapkan (mode development offline)
-                return "https://dummy-storage.appspot.com/exports/sample.pdf"
+            if not bucket_name:
+                raise Exception("GOOGLE_STORAGE_BUCKET is not configured.")
                 
             bucket = storage.bucket(bucket_name)
             file_name = f"exports/{user_id}/{uuid.uuid4().hex}.pdf"

@@ -7,9 +7,10 @@ from app.settings import settings
 NONCE_TTL_SECONDS = 300  # 5 menit
 
 EXEMPT_PATHS = {
-    "/api/v1/auth/google",
-    "/api/v1/auth/refresh",
-    "/api/v1/auth/logout",
+    "/v1/auth/google",
+    "/v1/auth/refresh",
+    "/v1/auth/logout",
+    "/",
 }
 
 PROTECTED_METHODS = {"POST", "PUT", "DELETE", "PATCH"}
