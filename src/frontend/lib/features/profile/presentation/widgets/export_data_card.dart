@@ -23,7 +23,7 @@ class _ExportDataCardState extends State<ExportDataCard> {
   bool _isExporting = false;
   DateTimeRange? _exportDateRange;
   String _exportFormat = 'PDF';
-  static const String _baseUrl = 'https://asia-southeast2-my-journal-8c171.cloudfunctions.net/api/v1';
+  static const String _baseUrl = 'https://api-mxoqac2vyq-et.a.run.app/v1';
 
   @override
   void initState() {

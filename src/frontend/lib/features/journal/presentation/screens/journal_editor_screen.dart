@@ -11,6 +11,7 @@ import '../../data/models/mood_analysis_model.dart';
 import '../../data/services/journal_firestore_service.dart';
 import '../../data/services/storage_service.dart';
 import '../../data/services/ai_api_service.dart';
+import '../../../../shared/services/location_service.dart';
 import 'package:provider/provider.dart';
 import '../../../../shared/providers/theme_provider.dart';
 
@@ -32,6 +33,8 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
   
   bool _isSaving = false;
   bool _isUploadingImage = false;
+  bool _isFetchingLocation = false;
+  String _currentLocation = '';
   String? _currentDraftId;
   
   File? _coverImageFile;
@@ -43,6 +46,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
     if (widget.existingJournal != null) {
       _titleController.text = widget.existingJournal!.title;
       _existingImageUrl = widget.existingJournal!.imageUrl;
+      _currentLocation = widget.existingJournal!.location;
       try {
         final jsonDelta = jsonDecode(widget.existingJournal!.content);
         _quillController = QuillController(
@@ -54,8 +58,26 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
       }
     } else {
       _quillController = QuillController.basic();
+      _fetchLocation(); // Auto-tag location for new journals
     }
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  Future<void> _fetchLocation() async {
+    setState(() => _isFetchingLocation = true);
+    final loc = await LocationService().getCurrentAccurateLocation();
+    if (mounted) {
+      setState(() {
+        _isFetchingLocation = false;
+        if (loc != null) {
+          _currentLocation = loc;
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Gagal mendapatkan lokasi akurat.')),
+          );
+        }
+      });
+    }
   }
 
   @override
@@ -90,7 +112,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
         id: widget.existingJournal?.id ?? _currentDraftId ?? '',
         title: title.isEmpty ? 'Jurnal Tanpa Judul' : title,
         content: contentJson,
-        location: widget.existingJournal?.location ?? 'Jakarta, ID',
+        location: _currentLocation.isEmpty ? 'Jakarta, ID' : _currentLocation,
         status: widget.existingJournal?.status ?? 'Draft',
         mood: widget.existingJournal?.mood ?? '📝',
         imageUrl: _existingImageUrl, // Only save existing URL in background. Cover changes wait for manual save.
@@ -219,7 +241,7 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
         id: widget.existingJournal != null ? widget.existingJournal!.id : (_currentDraftId ?? ''),
         title: title,
         content: contentJson,
-        location: widget.existingJournal != null ? widget.existingJournal!.location : 'Jakarta, ID',
+        location: _currentLocation.isEmpty ? 'Jakarta, ID' : _currentLocation,
         status: 'Published',
         mood: autoAnalysisResult != null ? autoAnalysisResult.primaryMood : (widget.existingJournal?.mood ?? '😎'),
         imageUrl: finalImageUrl,
@@ -436,12 +458,21 @@ class _JournalEditorScreenState extends State<JournalEditorScreen> with WidgetsB
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Row(
-                                  children: [
-                                    Icon(Icons.location_on_outlined, color: themeProvider.secondaryTextColor, size: 14),
-                                    const SizedBox(width: 4),
-                                    Text('Jakarta, ID', style: GoogleFonts.inter(color: themeProvider.secondaryTextColor, fontSize: 12)),
-                                  ],
+                                InkWell(
+                                  onTap: _fetchLocation,
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                                    child: Row(
+                                      children: [
+                                        _isFetchingLocation 
+                                          ? SizedBox(width: 14, height: 14, child: CircularProgressIndicator(strokeWidth: 2, color: themeProvider.secondaryTextColor))
+                                          : Icon(Icons.location_on_outlined, color: themeProvider.secondaryTextColor, size: 14),
+                                        const SizedBox(width: 6),
+                                        Text(_currentLocation.isEmpty ? 'Tag Lokasi' : _currentLocation, style: GoogleFonts.inter(color: themeProvider.secondaryTextColor, fontSize: 12)),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 Text(
                                   'Tersimpan otomatis sebagai Draft',

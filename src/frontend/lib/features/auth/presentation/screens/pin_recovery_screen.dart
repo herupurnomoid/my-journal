@@ -1,4 +1,5 @@
 import 'dart:ui';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -31,6 +32,8 @@ class _PinRecoveryScreenState extends State<PinRecoveryScreen> {
   final PinFirestoreService _pinFirestoreService = PinFirestoreService();
   
   bool _isLoading = false;
+  int _resendCooldown = 0;
+  Timer? _resendTimer;
 
   @override
   void initState() {
@@ -46,7 +49,47 @@ class _PinRecoveryScreenState extends State<PinRecoveryScreen> {
     _confirmPinController.dispose();
     for (var c in _otpControllers) { c.dispose(); }
     for (var f in _otpFocusNodes) { f.dispose(); }
+    _resendTimer?.cancel();
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    setState(() { _resendCooldown = 60; });
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_resendCooldown > 0) {
+        setState(() { _resendCooldown--; });
+      } else {
+        timer.cancel();
+      }
+    });
+  }
+
+  void _resendOtp() async {
+    if (_resendCooldown > 0) return;
+    
+    final email = _emailController.text.trim();
+    setState(() { _isLoading = true; });
+
+    try {
+      await _pinApiService.forgotPin(email);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('OTP baru berhasil dikirim!')),
+      );
+      _startResendTimer();
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal mengirim ulang: ${e.toString().replaceAll('Exception: ', '')}')),
+      );
+    } finally {
+      if (mounted) setState(() { _isLoading = false; });
+    }
   }
 
   void _nextPage() {
@@ -67,6 +110,7 @@ class _PinRecoveryScreenState extends State<PinRecoveryScreen> {
         const SnackBar(content: Text('OTP berhasil dikirim ke email Anda!')),
       );
       _nextPage();
+      _startResendTimer();
       // Focus ke kotak OTP pertama
       Future.delayed(const Duration(milliseconds: 300), () {
         if (mounted) _otpFocusNodes[0].requestFocus();
@@ -274,6 +318,23 @@ class _PinRecoveryScreenState extends State<PinRecoveryScreen> {
                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
                               : const Text('Verifikasi OTP'),
                         ),
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _resendCooldown > 0 
+                                ? 'Kirim ulang dalam $_resendCooldown detik' 
+                                : 'Tidak menerima kode?',
+                            style: GoogleFonts.inter(color: Colors.white70),
+                          ),
+                          if (_resendCooldown == 0)
+                            TextButton(
+                              onPressed: _isLoading ? null : _resendOtp,
+                              child: Text('Kirim Ulang', style: GoogleFonts.inter(fontWeight: FontWeight.bold, color: Colors.blueAccent)),
+                            ),
+                        ],
                       ),
                     ],
                   ),

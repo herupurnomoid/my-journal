@@ -72,5 +72,9 @@
 	<string>Aplikasi membutuhkan akses ke kamera untuk mengambil momen ke dalam jurnal Anda.</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Aplikasi membutuhkan akses ke Face ID/Touch ID untuk membuka kunci catatan jurnal Anda dengan aman.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Aplikasi membutuhkan akses lokasi untuk menandai jurnal Anda secara akurat.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Aplikasi membutuhkan akses lokasi untuk menandai jurnal Anda secara akurat.</string>
 </dict>
 </plist>

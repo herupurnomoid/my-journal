@@ -4,7 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import '../models/mood_analysis_model.dart';
 
 class AIApiService {
-  static const String baseUrl = 'https://asia-southeast2-my-journal-8c171.cloudfunctions.net/api/v1';
+  static const String baseUrl = 'https://api-mxoqac2vyq-et.a.run.app/v1';
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<MoodAnalysisModel> analyzeMood(String title, String content) async {

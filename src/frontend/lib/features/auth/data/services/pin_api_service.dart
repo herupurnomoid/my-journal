@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class PinApiService {
-  static const String baseUrl = 'https://asia-southeast2-my-journal-8c171.cloudfunctions.net/api/v1';
+  static const String baseUrl = 'https://api-mxoqac2vyq-et.a.run.app/v1';
 
   Future<String> forgotPin(String email) async {
     final url = Uri.parse('$baseUrl/auth/pin/forgot');
