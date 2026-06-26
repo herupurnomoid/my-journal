@@ -59,15 +59,16 @@ class JournalUseCases:
             file_name = f"exports/{user_id}/{uuid.uuid4().hex}.pdf"
             blob = bucket.blob(file_name)
             
+            download_token = uuid.uuid4()
+            blob.metadata = {"firebaseStorageDownloadTokens": str(download_token)}
+            
             # Upload file
             blob.upload_from_string(pdf_bytes, content_type='application/pdf')
             
-            # Hasilkan Signed URL yang aman, berlaku selama 1 jam
-            url = blob.generate_signed_url(
-                version="v4",
-                expiration=datetime.timedelta(hours=1),
-                method="GET"
-            )
+            # Construct Firebase Storage download URL
+            import urllib.parse
+            encoded_name = urllib.parse.quote(file_name, safe='')
+            url = f"https://firebasestorage.googleapis.com/v0/b/{bucket_name}/o/{encoded_name}?alt=media&token={download_token}"
             return url
             
         except Exception as e:

@@ -5,14 +5,13 @@ from app.connections.firebase import get_firestore_client
 class AuthRepository:
     @staticmethod
     def get_user_by_email(email: str) -> dict | None:
-        db = get_firestore_client()
-        query = db.collection("users").where("email", "==", email).limit(1).get()
-        if query:
-            user_doc = query[0]
-            data = user_doc.to_dict()
-            data['uid'] = user_doc.id
-            return data
-        return None
+        from app.connections.firebase import get_auth_client
+        auth_client = get_auth_client()
+        try:
+            user_record = auth_client.get_user_by_email(email)
+            return {"uid": user_record.uid, "email": user_record.email}
+        except Exception:
+            return None
 
     @staticmethod
     def save_otp_to_firestore(user_id: str, otp_code: str) -> None:

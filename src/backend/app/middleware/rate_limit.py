@@ -14,11 +14,10 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.default_limit = 100
         self.default_window = 60
-        self.rate_limits = {
-            "default": {"limit": 100, "window": 60},  # 100 req per minute
+        
+        self.strict_paths = {
             "/v1/auth": {"limit": 10, "window": 60},
             "/v1/journals/sync": {"limit": 20, "window": 60},
-            # Add other specific limits here
         }
 
     async def dispatch(self, request: Request, call_next):
